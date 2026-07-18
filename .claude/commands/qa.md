@@ -75,6 +75,7 @@ Follow the mode chosen in Phase 1:
 
 **chrome-devtools mode — drive the browser yourself**
 
+- **Open a REAL, VISIBLE Chrome window — NOT headless** so the user can watch the scenarios run. Launch it headed: `const browser = await chromium.launch({ headless: false, slowMo: 800, channel: 'chrome' })` (use `channel: 'chrome'`, `slowMo` ~600–900ms so each action is visible; fall back to bundled chromium only if the `chrome` channel is missing).
 - Boot the app locally (or use the URL the user gave), then walk each FE scenario in Chrome: navigate, click, type, and assert the on-screen result against the spec.
 - Capture evidence per scenario: screenshot, console errors, failing/4xx/5xx requests. Save screenshots under the charter folder.
 - Mark each FE scenario `[auto-verified]` (passed in-browser), `[needs-human]` (couldn't safely drive it — e.g. needs real payment), or `[FAIL]` (repro'd a bug → Phase 4).

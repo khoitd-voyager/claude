@@ -21,6 +21,16 @@ Read and follow these skills at `.claude/skills/<name>/SKILL.md`:
 
 If the browser can't be driven (Playwright/Chromium not installed, app not bootable), STOP and tell the user exactly what's missing (e.g. `npx playwright install chromium`) instead of faking a result.
 
+**Open a REAL, VISIBLE Chrome window — NOT headless.** The user wants to watch the flow happen on screen, like a person clicking. Launch Chrome headed with Playwright:
+
+```js
+const browser = await chromium.launch({ headless: false, slowMo: 800, channel: 'chrome' })
+```
+
+- `headless: false` + `channel: 'chrome'` → a real Chrome window pops up (fall back to bundled chromium only if `chrome` channel is missing).
+- `slowMo` (~600–900ms) so each click/type is visible; keep the window open a few seconds at the end before `browser.close()`.
+- Never run the repro headless — if you can't open a visible window, say so instead of silently going headless.
+
 ## Step 1 — Pin down the flow (ask only what you can't infer)
 
 From `$ARGUMENTS`, extract: **start URL**, **steps**, **what to check** (expected result / the suspected bug). Ask the user ONLY for what's genuinely missing and blocking:

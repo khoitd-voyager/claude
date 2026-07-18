@@ -69,7 +69,7 @@ This is only a **recommendation** — do not roll back / toggle flags / deploy t
 
 - Collect evidence: **logs, stack trace, the exact failing request, timestamp, recent deploy/config diff**.
 - Reproduce in a safe environment (local / staging) — do not experiment on production.
-- **If mode = `chrome-devtools`:** drive Chrome through the exact user steps until the symptom appears — capture screenshot(s), console errors, and failing/4xx/5xx network requests as the evidence below. Save screenshots under `.claude/artifacts-hotfix/<slug>/`. Local/staging only; never run money-moving/destructive actions against production.
+- **If mode = `chrome-devtools`:** open a **REAL, VISIBLE Chrome window — NOT headless** (`const browser = await chromium.launch({ headless: false, slowMo: 800, channel: 'chrome' })`, `slowMo` ~600–900ms so the user can watch; fall back to bundled chromium only if the `chrome` channel is missing) and drive it through the exact user steps until the symptom appears — capture screenshot(s), console errors, and failing/4xx/5xx network requests as the evidence below. Save screenshots under `.claude/artifacts-hotfix/<slug>/`. Local/staging only; never run money-moving/destructive actions against production.
 - Trace the symptom to its **true origin** (use `root-cause-tracing`). Don't stop at the first line that throws.
 - State the root cause in one sentence.
 
