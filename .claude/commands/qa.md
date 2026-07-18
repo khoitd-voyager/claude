@@ -7,7 +7,7 @@ argument-hint: "[slug ...]"
 
 Act as a **real-world tester (QA)**, independent from the developer. You did NOT write this code. Your job is to verify the product does what the **user** needs — and to actively try to break it — using the spec as the source of truth, not the implementation.
 
-> **Workflow:** `/create` → `/ship` → **`/qa`**
+> **Workflow:** `/create` → `/ship` -> `/reivew-ship` → **`/qa`**
 >
 > **How this differs from `/ship`:** `/ship` is the developer unit-testing their own code (white-box, `*.spec.ts`, `Verify:` commands). `/qa` is black-box: you test from the PRD/user story, cover negative/boundary/regression cases, and produce a **bug report with reproduction steps** — the things a dev testing their own work systematically misses.
 >
@@ -31,6 +31,9 @@ Act as a **real-world tester (QA)**, independent from the developer. You did NOT
    - If a slug has no folder or no `spec.md` → report it as **skipped (not shipped)** and continue with the rest; if *none* are valid, stop and tell the user to run `/create` + `/ship` first.
 3. For each valid slug, determine its layer(s): **BE** (`be/*`), **FE** (`BEXMP-storefront` / `BEXMP-admin`), or **Both**.
 4. **Treat the slug set as ONE feature under test.** Note where slugs overlap — shared services, shared files, or a flow that spans several slugs (e.g. one slug creates an order, another refunds it). These seams are the highest-risk area and get dedicated cross-slug scenarios in Phase 2.
+5. **Choose the FE test mode** (ask the user, or read `--browser` / `--static` from `$ARGUMENTS`):
+   - **`static`** (default) — verify FE statically + emit a manual checklist for the human (Phase 3 FE, static path).
+   - **`chrome-devtools`** — actually **drive Chrome** to run the FE scenarios yourself (best for real E2E: click through the flow, assert on-screen). If chosen, load `browser-testing-with-devtools` + `chrome-devtools`; you'll need a base URL and a **test account** from the user (never read `.env`). BE scenarios still run as specs regardless of mode.
 
 ## Phase 2: Design Test Charter (spec-first, no code yet)
 
@@ -60,11 +63,22 @@ Each scenario: `ID | Slug(s) | Precondition | Steps | Expected result | Techniqu
 
 > Note: `be/*` specs need a throwaway jest config with `moduleNameMapper` for path aliases — see memory `be-jest-alias-temp-config`. That config is temporary too; remove it when done.
 
-### FE (storefront / admin) — manual checklist for the human
+### FE (storefront / admin)
 
-- You cannot (and must not) spin up dev servers or automate the browser here. Instead, emit a **numbered manual test checklist** the user can click through, one line per step with the exact expected result.
+Follow the mode chosen in Phase 1:
+
+**Static mode (default) — manual checklist for the human**
+
+- Emit a **numbered manual test checklist** the user can click through, one line per step with the exact expected result.
 - Where you CAN verify statically, do so and record evidence: localization keys exist in every language file, the component is actually wired (import + used), handler is not a no-op stub, empty/loading/error states exist.
 - Mark each FE scenario as `[auto-verified]`, `[needs-human]`, or `[FAIL]`.
+
+**chrome-devtools mode — drive the browser yourself**
+
+- Boot the app locally (or use the URL the user gave), then walk each FE scenario in Chrome: navigate, click, type, and assert the on-screen result against the spec.
+- Capture evidence per scenario: screenshot, console errors, failing/4xx/5xx requests. Save screenshots under the charter folder.
+- Mark each FE scenario `[auto-verified]` (passed in-browser), `[needs-human]` (couldn't safely drive it — e.g. needs real payment), or `[FAIL]` (repro'd a bug → Phase 4).
+- Local/staging only; never run money-moving/destructive flows against production, and never read `.env` (ask the user for a test account).
 
 ## Phase 4: Bug Report
 
@@ -108,3 +122,4 @@ Record significant QA learnings (recurring defect patterns) to memory.
 | Implement (dev)          | `/ship`            |
 | Fix a bug QA found       | `/fix-bugs <slug>` |
 | Investigate a prod bug   | `/hotfix`          |
+| Drive Chrome for a flow  | `/repro`           |

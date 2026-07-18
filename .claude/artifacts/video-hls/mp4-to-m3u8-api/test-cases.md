@@ -29,3 +29,4 @@ Runner: `cd backend && npm run test -- src/video/video.service.spec.ts`
 > Note: heavy real-transcode cases may be mocked at the ffmpeg boundary in the
 > unit spec; case 1 should assert on the ffmpeg command/options and the output
 > path wiring. Delete the `.spec.ts` after all cases pass.
+`
